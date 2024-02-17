@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/elastic/go-elasticsearch/v8"
@@ -58,7 +59,7 @@ func (e *ElasticManager) CreateIndex(name string) error {
 	return nil
 }
 
-func (e *ElasticManager) IndexDocuments(index string, documents []byte) error {
+func (e *ElasticManager) CreateDocuments(index string, documents []byte) error {
 	// create index succeed [201 Created]
 	// {
 	// 	"_index":"bosung",
@@ -81,7 +82,7 @@ func (e *ElasticManager) IndexDocuments(index string, documents []byte) error {
 	return nil
 }
 
-func (e *ElasticManager) GetDocuments(index string, documentsID string) ([]byte, error) {
+func (e *ElasticManager) GetDocument(index string, documentID string) ([]byte, error) {
 	// [200 OK]
 	// {
 	// 	"_index":"bosung",
@@ -94,7 +95,59 @@ func (e *ElasticManager) GetDocuments(index string, documentsID string) ([]byte,
 	// 	   "message":"테스트가 잘 될까요?"
 	// 	}
 	//  }
-	res, err := e.client.Get(index, documentsID)
+	res, err := e.client.Get(index, documentID)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	defer res.Body.Close()
+	if res.StatusCode != 200 {
+		return []byte{}, err
+	}
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return body, nil
+}
+
+
+func (e *ElasticManager) SearchDocument(index string, query string) ([]byte, error) {
+	// query: `{ "query": { "match_all": {} } }`
+	
+	// {
+	// 	"took":40,
+	// 	"timed_out":false,
+	// 	"_shards":{
+	// 	   "total":1,
+	// 	   "successful":1,
+	// 	   "skipped":0,
+	// 	   "failed":0
+	// 	},
+	// 	"hits":{
+	// 	   "total":{
+	// 		  "value":1,
+	// 		  "relation":"eq"
+	// 	   },
+	// 	   "max_score":1.0,
+	// 	   "hits":[
+	// 		  {
+	// 			 "_index":"bosung",
+	// 			 "_id":"frDAto0BFjoKUr_vtenp",
+	// 			 "_score":1.0,
+	// 			 "_source":{
+	// 				"message":"테스트가 잘 될까요?"
+	// 			 }
+	// 		  }
+	// 	   ]
+	// 	}
+	//  }
+	res, err := e.client.Search(
+		e.client.Search.WithIndex(index),
+		e.client.Search.WithBody(strings.NewReader(query)),
+	)
 	if err != nil {
 		return []byte{}, err
 	}

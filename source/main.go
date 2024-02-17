@@ -10,11 +10,12 @@ func main() {
 
 	err := elasticManager.Connect()
 	if err != nil {
-		fmt.Println("client failed", err)
+		fmt.Println("connect client failed", err)
 
 		return
 	}
 
-	res, err := elasticManager.GetDocuments("bosung", "frDAto0BFjoKUr_vtenp")
-	fmt.Println("GetDocuments: ", string(res))
+	query := `{ "query": { "match_all": {} } }`
+	res, err := elasticManager.SearchDocument("bosung", query)
+	fmt.Println("SearchDocument: ", string(res))
 }
