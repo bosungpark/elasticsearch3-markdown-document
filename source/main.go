@@ -15,6 +15,5 @@ func main() {
 		return
 	}
 
-	res, err := elasticStore.GetDocument("bosung", "frDAto0BFjoKUr_vtenp")
-	fmt.Println(string(res))
+	err = elasticStore.DeleteDocument("bosung", "frDAto0BFjoKUr_vtenp")
 }

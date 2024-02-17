@@ -51,8 +51,11 @@ func (e *ElasticStore) CreateIndex(name string) error {
 	// 	"shards_acknowledged":true,
 	// 	"index":"bosung"
 	//  }
-	_, err := e.client.Indices.Create(name)
+	res, err := e.client.Indices.Create(name)
 	if err != nil {
+		return err
+	}
+	if res.StatusCode != 200 {
 		return err
 	}
 
@@ -74,8 +77,11 @@ func (e *ElasticStore) CreateDocuments(index string, documents []byte) error {
 	// 	"_seq_no":0,
 	// 	"_primary_term":1
 	//  }
-	_, err := e.client.Index(index, bytes.NewReader(documents))
+	res, err := e.client.Index(index, bytes.NewReader(documents))
 	if err != nil {
+		return err
+	}
+	if res.StatusCode != 201 {
 		return err
 	}
 
@@ -165,7 +171,6 @@ func (e *ElasticStore) SearchDocument(index string, query string) ([]byte, error
 }
 
 func (e *ElasticStore) UpdateDocument(index string, documentID string, document string) error {
-
 	// [200 OK]
 	// {
 	// 	"_index":"bosung",
@@ -180,8 +185,37 @@ func (e *ElasticStore) UpdateDocument(index string, documentID string, document 
 	// 	"_seq_no":1,
 	// 	"_primary_term":1
 	//  }
-	_, err := e.client.Update(index, documentID, strings.NewReader(document))
+	res, err := e.client.Update(index, documentID, strings.NewReader(document))
 	if err != nil {
+		return err
+	}
+	if res.StatusCode != 200 {
+		return err
+	}
+
+	return nil
+}
+
+func (e *ElasticStore) DeleteDocument(index string, documentID string) error {
+	// [200 OK]
+	// {
+	// 	"_index":"bosung",
+	// 	"_id":"frDAto0BFjoKUr_vtenp",
+	// 	"_version":3,
+	// 	"result":"deleted",
+	// 	"_shards":{
+	// 	   "total":2,
+	// 	   "successful":1,
+	// 	   "failed":0
+	// 	},
+	// 	"_seq_no":2,
+	// 	"_primary_term":1
+	// }
+	res, err := e.client.Delete(index, documentID)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != 200 {
 		return err
 	}
 
