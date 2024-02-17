@@ -2,6 +2,8 @@ package main
 
 import (
 	"elastic/source/utills"
+	"elastic/source/schemas"
+	"encoding/json"
 	"fmt"
 )
 
@@ -15,4 +17,8 @@ func main() {
 		return
 	}
 
+	document := schemas.TestDocument{Message: "테스트가 잘 될까요?"}
+	data, _ := json.Marshal(document)
+	
+	elasticManager.IndexDocuments("bosung", data)
 }
