@@ -1,21 +1,20 @@
 package main
 
 import (
-	"elastic/source/utills"
+	"elastic/source/stores"
 	"fmt"
 )
 
 func main() {
-	elasticManager := utills.ElasticManager{}
+	elasticStore := stores.ElasticStore{}
 
-	err := elasticManager.Connect()
+	err := elasticStore.Connect()
 	if err != nil {
 		fmt.Println("connect client failed", err)
 
 		return
 	}
 
-	query := `{ "query": { "match_all": {} } }`
-	res, err := elasticManager.SearchDocument("bosung", query)
-	fmt.Println("SearchDocument: ", string(res))
+	res, err := elasticStore.GetDocument("bosung", "frDAto0BFjoKUr_vtenp")
+	fmt.Println(string(res))
 }

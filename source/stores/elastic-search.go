@@ -1,4 +1,4 @@
-package utills
+package stores
 
 import (
 	"bytes"
@@ -12,11 +12,11 @@ import (
 	"github.com/elastic/go-elasticsearch/v8"
 )
 
-type ElasticManager struct {
+type ElasticStore struct {
 	client *elasticsearch.Client
 }
 
-func (e *ElasticManager) Connect() error {
+func (e *ElasticStore) Connect() error {
 	cfg := elasticsearch.Config{
 		Addresses: []string{
 			"https://localhost:9200",
@@ -44,7 +44,7 @@ func (e *ElasticManager) Connect() error {
 	return nil
 }
 
-func (e *ElasticManager) CreateIndex(name string) error {
+func (e *ElasticStore) CreateIndex(name string) error {
 	// create index succeed [200 OK]
 	// {
 	// 	"acknowledged":true,
@@ -59,7 +59,7 @@ func (e *ElasticManager) CreateIndex(name string) error {
 	return nil
 }
 
-func (e *ElasticManager) CreateDocuments(index string, documents []byte) error {
+func (e *ElasticStore) CreateDocuments(index string, documents []byte) error {
 	// create index succeed [201 Created]
 	// {
 	// 	"_index":"bosung",
@@ -82,7 +82,7 @@ func (e *ElasticManager) CreateDocuments(index string, documents []byte) error {
 	return nil
 }
 
-func (e *ElasticManager) GetDocument(index string, documentID string) ([]byte, error) {
+func (e *ElasticStore) GetDocument(index string, documentID string) ([]byte, error) {
 	// [200 OK]
 	// {
 	// 	"_index":"bosung",
@@ -113,10 +113,9 @@ func (e *ElasticManager) GetDocument(index string, documentID string) ([]byte, e
 	return body, nil
 }
 
-
-func (e *ElasticManager) SearchDocument(index string, query string) ([]byte, error) {
+func (e *ElasticStore) SearchDocument(index string, query string) ([]byte, error) {
 	// query: `{ "query": { "match_all": {} } }`
-	
+
 	// {
 	// 	"took":40,
 	// 	"timed_out":false,
@@ -163,4 +162,28 @@ func (e *ElasticManager) SearchDocument(index string, query string) ([]byte, err
 	}
 
 	return body, nil
+}
+
+func (e *ElasticStore) UpdateDocument(index string, documentID string, document string) error {
+
+	// [200 OK]
+	// {
+	// 	"_index":"bosung",
+	// 	"_id":"frDAto0BFjoKUr_vtenp",
+	// 	"_version":2,
+	// 	"result":"updated",
+	// 	"_shards":{
+	// 	   "total":2,
+	// 	   "successful":1,
+	// 	   "failed":0
+	// 	},
+	// 	"_seq_no":1,
+	// 	"_primary_term":1
+	//  }
+	_, err := e.client.Update(index, documentID, strings.NewReader(document))
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
