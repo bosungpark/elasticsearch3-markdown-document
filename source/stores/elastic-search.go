@@ -221,3 +221,17 @@ func (e *ElasticStore) DeleteDocument(index string, documentID string) error {
 
 	return nil
 }
+
+func (e *ElasticStore) DeleteIndex(index string) error {
+	// [200 OK]
+	// {"acknowledged":true}
+	res, err := e.client.Indices.Delete([]string{index})
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != 200 {
+		return err
+	}
+
+	return nil
+}

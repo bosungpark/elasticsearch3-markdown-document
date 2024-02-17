@@ -15,5 +15,5 @@ func main() {
 		return
 	}
 
-	err = elasticStore.DeleteDocument("bosung", "frDAto0BFjoKUr_vtenp")
+	err = elasticStore.DeleteIndex("bosung")
 }
