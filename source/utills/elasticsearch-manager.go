@@ -3,7 +3,7 @@ package utills
 import (
 	"bytes"
 	"crypto/tls"
-	"fmt"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"time"
@@ -44,28 +44,21 @@ func (e *ElasticManager) Connect() error {
 }
 
 func (e *ElasticManager) CreateIndex(name string) error {
-	res, err := e.client.Indices.Create(name)
-	if err != nil {
-		return err
-	}
-
 	// create index succeed [200 OK]
 	// {
 	// 	"acknowledged":true,
 	// 	"shards_acknowledged":true,
 	// 	"index":"bosung"
 	//  }
-	fmt.Println("create index succeed", res)
-
-	return nil
-}
-
-func (e *ElasticManager) IndexDocuments(index string, document []byte) error {
-	res, err := e.client.Index(index, bytes.NewReader(document))
+	_, err := e.client.Indices.Create(name)
 	if err != nil {
 		return err
 	}
 
+	return nil
+}
+
+func (e *ElasticManager) IndexDocuments(index string, documents []byte) error {
 	// create index succeed [201 Created]
 	// {
 	// 	"_index":"bosung",
@@ -80,7 +73,41 @@ func (e *ElasticManager) IndexDocuments(index string, document []byte) error {
 	// 	"_seq_no":0,
 	// 	"_primary_term":1
 	//  }
-	fmt.Println("create index succeed", res)
+	_, err := e.client.Index(index, bytes.NewReader(documents))
+	if err != nil {
+		return err
+	}
 
 	return nil
+}
+
+func (e *ElasticManager) GetDocuments(index string, documentsID string) ([]byte, error) {
+	// [200 OK]
+	// {
+	// 	"_index":"bosung",
+	// 	"_id":"frDAto0BFjoKUr_vtenp",
+	// 	"_version":1,
+	// 	"_seq_no":0,
+	// 	"_primary_term":1,
+	// 	"found":true,
+	// 	"_source":{
+	// 	   "message":"테스트가 잘 될까요?"
+	// 	}
+	//  }
+	res, err := e.client.Get(index, documentsID)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	defer res.Body.Close()
+	if res.StatusCode != 200 {
+		return []byte{}, err
+	}
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return body, nil
 }
